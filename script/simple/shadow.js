@@ -44,8 +44,7 @@ function main() {
         program: shadowProgram,
         attribLocations: {
             vertexPosition: gl.getAttribLocation(shadowProgram, 'aVertexPosition'),
-            textureCoord: gl.getAttribLocation(shadowProgram, "aTextureCoord"),
-            vertexColor: gl.getAttribLocation(shadowProgram, "aVertexColor"),
+            textureCoord: gl.getAttribLocation(shadowProgram, "aTextureCoord")
         },
         uniformLocations: {
             projectionMatrix: gl.getUniformLocation(shadowProgram, 'uProjectionMatrix'),
@@ -91,10 +90,10 @@ function drawScene(gl, programInfo, buffers, rotation) {
     setColor(gl, programInfo, buffers);
     initArrayBuffer(gl, 'aNormal', CubeNormals, 3, gl.FLOAT)
     setPointLight(gl, programInfo);
-    gl.uniform1i(programInfo.uniformLocations.shadowMap, 0); 
+    gl.uniform1i(programInfo.uniformLocations.shadowMap, 0);
     setMVP(gl, programInfo, rotation);
     
-    gl.uniformMatrix4fv(
+    mv&&gl.uniformMatrix4fv(
         programInfo.uniformLocations.mvMatrixFromLight ,
         false,
         mv);
@@ -104,36 +103,47 @@ function drawScene(gl, programInfo, buffers, rotation) {
 
 function drawPlane(gl, programInfo){
     const buffers = initBuffers(gl,[
-        3.0, -1.7, 2.5,  -3.0, -1.7, 2.5,  -3.0, -1.7, -2.5,
-        3.0, -1.7, 2.5,  -3.0, -1.7, -2.5,  3.0, -1.7, -2.5    
+        3.0, -2.0, -3.0,  3.0, -2.0, 3.0,  -3.0, -2.0, 3.0,
+        3.0, -2.0, -3.0,  -3.0, -2.0, 3.0,  -3.0, -2.0, -3.0    
       ],[
         1.0, 1.0, 1.0,1.0,    1.0, 1.0, 1.0,1.0,  1.0, 1.0, 1.0,1.0,   
         1.0, 1.0, 1.0,1.0,    1.0, 1.0, 1.0,1.0,  1.0, 1.0, 1.0,1.0,
       ],0);
     setPosition(gl, programInfo, buffers);
-    // setColor(gl, programInfo, buffers);
+    setColor(gl, programInfo, buffers);
+    initArrayBuffer(gl, 'aNormal', new Float32Array([
+        0.0,-1.0,0.0, 0.0,-1.0,0.0, 0.0,-1.0,0.0,
+        0.0,-1.0,0.0, 0.0,-1.0,0.0, 0.0,-1.0,0.0,
+  ]), 3, gl.FLOAT);
     setPointLight(gl, programInfo);
     if(programInfo.uniformLocations.shadowMap)gl.uniform1i(programInfo.uniformLocations.shadowMap, 0); 
-    setMVP(gl, programInfo,-45);
-    if(programInfo.uniformLocations.mvMatrixFromLight){
+    setMVP(gl, programInfo);
+    if(mv){
         gl.uniformMatrix4fv(
             programInfo.uniformLocations.mvMatrixFromLight ,
             false,
             mv);
     }
 
-    gl.drawArrays(gl.TRIANGLES, 0, 4);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
 }
 
 
 let mv;
 function drawShadow(gl, programInfo, buffers, rotation) {
     clearMsceen(gl);
-    drawPlane(gl, programInfo);
     gl.useProgram(gl.shadowProgram);
-    setPosition(gl, programInfo, buffers);
-    mv = setMVP(gl, programInfo, rotation, [2.3, 4.0, 3.5]);
 
+    let buffers2 = initBuffers(gl,[
+        3.0, -2.0, -3.0,  3.0, -2.0, 3.0,  -3.0, -2.0, 3.0,
+        3.0, -2.0, -3.0,  -3.0, -2.0, 3.0,  -3.0, -2.0, -3.0    
+      ],0,0);
+    setPosition(gl, programInfo, buffers2);
+    mv = setMVP(gl, programInfo, rotation,);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    
+    setPosition(gl, programInfo, buffers);
+    mv = setMVP(gl, programInfo, rotation);
     gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);  
 }
 
@@ -142,7 +152,7 @@ function setPointLight(gl, programInfo){
   // Set the light color (white)
   gl.uniform3f(programInfo.uniformLocations.lightColor, 1.0, 1.0, 1.0);
   // Set the light direction (in the world coordinate)
-  gl.uniform3f(programInfo.uniformLocations.lightPosition, 2.3, 4.0, 3.5);
+  gl.uniform3f(programInfo.uniformLocations.lightPosition, 0.0, 14.0, 0.0);
   // Set the ambient light
   gl.uniform3f(programInfo.uniformLocations.ambientLight, 0.2, 0.2, 0.2);
 }

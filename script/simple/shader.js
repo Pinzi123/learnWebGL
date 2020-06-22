@@ -58,7 +58,7 @@ var sfsSource =`
     void main(void) {
         vec3 shadowCoord = (v_PositionFromLight.xyz/v_PositionFromLight.w)/2.0 + 0.5;
         float depth = texture2D(uShadowMap, shadowCoord.xy).r;
-        float visibility = (shadowCoord.z > depth + 0.005) ? 0.7 : 1.0;
+        float visibility = (shadowCoord.z > depth + 0.005) ? 0.1 : 1.0;
         gl_FragColor = vec4(vColor.rgb * visibility, vColor.a);
     }
   `;

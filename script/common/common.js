@@ -1,4 +1,4 @@
-var OFFSCREEN_WIDTH = 1024, OFFSCREEN_HEIGHT = 624;
+var OFFSCREEN_WIDTH = 512, OFFSCREEN_HEIGHT = 512;
 var LIGHT_X = 0, LIGHT_Y = 7, LIGHT_Z = 2; // Position of the light source
 
 function isPowerOf2(value) {
@@ -235,7 +235,7 @@ function initBuffers(gl,positions,colorCoordinates,textureCoordinates) {
       colors = colors.concat(colorCoordinates);
     } else{
       for (var j = 0; j < positions.length/3; ++j) {
-        colors = colors.concat([1,0,0,1]);
+        colors = colors.concat([1.0,0.0,0.0,1.0]);
       }
     }
     
@@ -257,9 +257,6 @@ function initBuffers(gl,positions,colorCoordinates,textureCoordinates) {
   
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordinates),gl.STATIC_DRAW);
   }
-  console.log(colors);
-  
-
   return {
     position: positionBuffer,
     color: colorBuffer,
@@ -291,7 +288,7 @@ function initArrayBuffer(gl, attribute, data, num, type) {
   return true;
 }
 
-function setMVP(gl,programInfo,rotation=0,eye){
+function setMVP(gl,programInfo,rotation=0, center=[0.0,0.0,1.0],eye=[0.0,0.0,-6.0],up=[0.0,1.0,0.0]){
   
   const fieldOfView = 45 * Math.PI / 180;   // in radians
   const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
@@ -309,24 +306,23 @@ function setMVP(gl,programInfo,rotation=0,eye){
 
   // Set the drawing position to the "identity" point, which is
   // the center of the scene.
-  const modelViewMatrix = mat4.create();
+  const modelMatrix = mat4.create();
 
-  // Now move the drawing position a bit to where we want to
-  // start drawing the square.
-
-  mat4.translate(modelViewMatrix,     // destination matrix
-                 modelViewMatrix,     // matrix to translate
-                 eye||[-0.0, 0.0, -6.0]);  // amount to translate
-
-  mat4.rotate(modelViewMatrix,  // destination matrix
-              modelViewMatrix,  // matrix to rotate
+  mat4.rotate(modelMatrix,  // destination matrix
+              modelMatrix,  // matrix to rotate
               rotation,     // amount to rotate in drawArrays
               [0, 0, 1]);       // axis to rotate around (Z)
-  mat4.rotate(modelViewMatrix,  // destination matrix
-              modelViewMatrix,  // matrix to rotate
+  mat4.rotate(modelMatrix,  // destination matrix
+              modelMatrix,  // matrix to rotate
               rotation * .7,// amount to rotate in radians
               [0, 1, 0]);       // axis to rotate around (X)
 
+  const viewMatrix = mat4.create();
+  mat4.lookAt(viewMatrix, eye, center, up);
+
+  let modelViewMatrix = mat4.create();
+
+  mat4.multiply(modelViewMatrix,viewMatrix,modelMatrix);
   gl.uniformMatrix4fv(
       programInfo.uniformLocations.projectionMatrix,
       false,
@@ -368,6 +364,7 @@ function setPosition(gl,programInfo,buffers)
       offset);
   gl.enableVertexAttribArray(
       programInfo.attribLocations.vertexPosition);
+      
   if(buffers.indices){
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.indices);
   }
