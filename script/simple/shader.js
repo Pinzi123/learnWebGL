@@ -1,5 +1,6 @@
 var svsSource = `
     attribute vec4 aVertexPosition;
+    attribute vec4 aVertexColor;
     uniform mat4 uModelViewMatrix;
     uniform mat4 uProjectionMatrix;
     void main(void) {
@@ -13,7 +14,7 @@ var sfsSource =`
     precision mediump float;
     #endif
     void main() {
-        gl_FragColor = vec4(gl_FragCoord.z, 0.0, 0.0, 0.0);
+        gl_FragColor = vec4(gl_FragCoord.z, 0.0, 0.0, 1.0);
     }
 `;
 

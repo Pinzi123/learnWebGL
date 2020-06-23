@@ -1,49 +1,3 @@
-const canvas = document.querySelector('#glcanvas');
-const gl = canvas.getContext('webgl');
-
-let programInfo = {
-    attribLocations: {
-        vertexPosition: null,
-        textureCoord: null,
-        vertexColor: null,
-    },
-    uniformLocations: {
-        projectionMatrix: null,
-        modelViewMatrix: null,
-        modelMatrix: null,
-        normalMatrix: null,
-        mvMatrixFromLight: null,
-
-        lightColor: null,
-        lightPosition: null,
-        ambientLight: null,
-        shadowMap: null,
-    },
-};
-
-function useProgram(gl,shaderProgram){
-    gl.useProgram(shaderProgram);
-    programInfo = {
-        attribLocations: {
-            vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
-            textureCoord: gl.getAttribLocation(shaderProgram, "aTextureCoord"),
-            vertexColor: gl.getAttribLocation(shaderProgram, "aVertexColor"),
-        },
-        uniformLocations: {
-            projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
-            modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
-            modelMatrix: gl.getUniformLocation(shaderProgram, 'uModelMatrix'),
-            normalMatrix: gl.getUniformLocation(shaderProgram, 'uNormalMatrix'),
-            mvMatrixFromLight: gl.getUniformLocation(shaderProgram, 'uMvMatrixFromLight'),
-    
-            lightColor: gl.getUniformLocation(shaderProgram, 'uLightColor'),
-            lightPosition: gl.getUniformLocation(shaderProgram, 'uLightPosition'),
-            ambientLight: gl.getUniformLocation(shaderProgram, 'uAmbientLight'),
-            shadowMap: gl.getUniformLocation(shaderProgram, 'uShadowMap'),
-        },
-    };
-}
-
 function isPowerOf2(value) {
     return (value & (value - 1)) == 0;
 }
@@ -202,7 +156,7 @@ const CubeVertexIndices = [
   20, 21, 22,     20, 22, 23    // left
 ];
 
-const CubeNormals =[
+const CubeNormals = new Float32Array([
     // Front
     0.0,  0.0,  1.0,
     0.0,  0.0,  1.0,
@@ -238,7 +192,75 @@ const CubeNormals =[
    -1.0,  0.0,  0.0,
    -1.0,  0.0,  0.0,
    -1.0,  0.0,  0.0
-];
+]);
+
+function initBuffers(gl,positions,colorCoordinates,textureCoordinates) {
+
+  // Create a buffer for the square's positions.
+
+  const positionBuffer = gl.createBuffer();
+
+
+  if(positions){
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    if(positions===1) positions = null;
+    positions = positions||[
+       2.0,  2.0, 0.0,
+      -2.0,  2.0, 0.0,
+       2.0, -2.0, 0.0,
+      -2.0, -2.0, 0.0,
+    ];
+  
+    gl.bufferData(gl.ARRAY_BUFFER,
+                  new Float32Array(positions),
+                  gl.STATIC_DRAW);
+  }
+
+  let indexBuffer = null;
+  if(positions === CubeVertices){
+    indexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,
+      new Uint16Array(CubeVertexIndices), gl.STATIC_DRAW);
+  }
+
+  const colorBuffer =  gl.createBuffer();
+
+  if(colorCoordinates){
+    var colors = [];
+    if(colorCoordinates.length){
+      colors = colors.concat(colorCoordinates);
+    } else{
+      for (var j = 0; j < positions.length/3; ++j) {
+        colors = colors.concat([1.0,0.0,0.0,1.0]);
+      }
+    }
+    
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+  
+  }
+
+  const textureBuffer = gl.createBuffer();
+  if(textureCoordinates){
+    gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer);
+    if(textureCoordinates===1) textureCoordinates = null;
+    textureCoordinates = textureCoordinates||[
+      1.0,  0.0,
+      0.0,  0.0,
+      1.0,  1.0,
+      0.0,  1.0,
+    ];
+  
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordinates),gl.STATIC_DRAW);
+  }
+  return {
+    position: positionBuffer,
+    color: colorBuffer,
+    indices: indexBuffer,
+    textureCoord:  textureBuffer,
+  };
+}
 
 function initArrayBuffer(gl, attribute, data, num, type) {
   // Create a buffer object
@@ -263,56 +285,7 @@ function initArrayBuffer(gl, attribute, data, num, type) {
   return true;
 }
 
-function setOnecolor(gl, color, num){
-    if(programInfo.attribLocations.vertexColor < 0) return;
-    
-    const colorBuffer =  gl.createBuffer();
- 
-    var colors = [];
-    for (var j = 0; j < num; ++j) {
-        colors = colors.concat(color);
-    }
-      
-    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-    
-    const numComponents = 4;
-    const type = gl.FLOAT;
-    const normalize = false;
-    const stride = 0;
-    const offset = 0;
-    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-    
-    gl.vertexAttribPointer(
-        programInfo.attribLocations.vertexColor,
-        numComponents,
-        type,
-        normalize,
-        stride,
-        offset);
-    gl.enableVertexAttribArray(
-        programInfo.attribLocations.vertexColor);
-}
-
-function setPosition(gl, data, num, type, indices=null,normals=null){
-    initArrayBuffer(gl, "aVertexPosition", 
-        new Float32Array(data), num, type);
-    if(indices&&indices["length"]){
-        let indexBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,
-            new Uint16Array(indices), gl.STATIC_DRAW);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-    }
-
-    if(normals&&normals["length"]){
-        initArrayBuffer(gl, "aNormal", 
-            new Float32Array(normals), num, type);
-    }
-}
-
-
-function setMVP(gl, rotation=0, eye=[0.0,5.0,-6.0], center=[0.0,0.0,1.0], up=[0.0,1.0,0.0]){
+function setMVP(gl,programInfo,rotation=0, eye=[0.0,0.0,-6.0], center=[0.0,0.0,1.0], up=[0.0,1.0,0.0]){
   
   const fieldOfView = 45 * Math.PI / 180;   // in radians
   const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
@@ -378,6 +351,68 @@ function setMVP(gl, rotation=0, eye=[0.0,5.0,-6.0], center=[0.0,0.0,1.0], up=[0.
       
 }
 
+
+function setPosition(gl,programInfo,buffers)
+{
+  const numComponents = 3;
+  const type = gl.FLOAT;
+  const normalize = false;
+  const stride = 0;
+  const offset = 0;
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
+  gl.vertexAttribPointer(
+      programInfo.attribLocations.vertexPosition,
+      numComponents,
+      type,
+      normalize,
+      stride,
+      offset);
+  gl.enableVertexAttribArray(
+      programInfo.attribLocations.vertexPosition);
+      
+  if(buffers.indices){
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.indices);
+  }
+}
+
+function setColor(gl,programInfo,buffers)
+{
+  const numComponents = 4;
+  const type = gl.FLOAT;
+  const normalize = false;
+  const stride = 0;
+  const offset = 0;
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffers.color);
+  gl.vertexAttribPointer(
+      programInfo.attribLocations.vertexColor,
+      numComponents,
+      type,
+      normalize,
+      stride,
+      offset);
+  gl.enableVertexAttribArray(
+      programInfo.attribLocations.vertexColor);
+}
+
+
+function setTextureCoord(gl,programInfo,buffers)
+{
+  const numComponents = 2;
+  const type = gl.FLOAT;
+  const normalize = false;
+  const stride = 0;
+  const offset = 0;
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffers.textureCoord);
+  gl.vertexAttribPointer(
+      programInfo.attribLocations.textureCoord,
+      numComponents,
+      type,
+      normalize,
+      stride,
+      offset);
+  gl.enableVertexAttribArray(
+      programInfo.attribLocations.textureCoord);
+}
 
 function setTexture(gl,programInfo,texture){
     // Tell WebGL we want to affect texture unit 0
@@ -458,13 +493,3 @@ function initFramebufferObject(gl) {
 
   return framebuffer;
 }
-
-
-function setPointLight(gl){
-    // Set the light color (white)
-    gl.uniform3f(programInfo.uniformLocations.lightColor, 1.0, 1.0, 1.0);
-    // Set the light direction (in the world coordinate)
-    gl.uniform3f(programInfo.uniformLocations.lightPosition, 1.0, 14.0, 0.0);
-    // Set the ambient light
-    gl.uniform3f(programInfo.uniformLocations.ambientLight, 0.2, 0.2, 0.2);
-  }
