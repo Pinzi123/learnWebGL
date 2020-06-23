@@ -1,6 +1,3 @@
-var OFFSCREEN_WIDTH = 512, OFFSCREEN_HEIGHT = 512;
-var LIGHT_X = 0, LIGHT_Y = 7, LIGHT_Z = 2; // Position of the light source
-
 function isPowerOf2(value) {
     return (value & (value - 1)) == 0;
 }
@@ -288,7 +285,7 @@ function initArrayBuffer(gl, attribute, data, num, type) {
   return true;
 }
 
-function setMVP(gl,programInfo,rotation=0, center=[0.0,0.0,1.0],eye=[0.0,0.0,-6.0],up=[0.0,1.0,0.0]){
+function setMVP(gl,programInfo,rotation=0, eye=[0.0,5.0,-6.0], center=[0.0,0.0,1.0], up=[0.0,1.0,0.0]){
   
   const fieldOfView = 45 * Math.PI / 180;   // in radians
   const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
@@ -341,6 +338,14 @@ function setMVP(gl,programInfo,rotation=0, center=[0.0,0.0,1.0],eye=[0.0,0.0,-6.
       false,
       normalMatrix);
   }
+
+  if(programInfo.uniformLocations.modelMatrix){
+    gl.uniformMatrix4fv(
+      programInfo.uniformLocations.modelMatrix,
+      false,
+      modelMatrix);
+  }
+  
 
   return modelViewMatrix;
       
