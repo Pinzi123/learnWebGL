@@ -1,5 +1,6 @@
 
 var OFFSCREEN_WIDTH = 512, OFFSCREEN_HEIGHT = 512,cubeRotation=0;
+const lightPos =  [0.0, 14.0, 0.0];
 main();
 
 function main() {
@@ -29,9 +30,9 @@ function main() {
     gl.enable(gl.DEPTH_TEST);
 
     const render = (now) => {
-        // gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
         drawShadow(gl,cubeRotation);
-        // drawScene(gl, cubeRotation);
+        drawScene(gl, cubeRotation);
         cubeRotation += 0.01;
         requestAnimationFrame(render);
     }
@@ -51,13 +52,13 @@ function drawScene(gl, rotation) {
     drawCube(gl);
 
     setMVP(gl,0);
-    drawPlane(gl, programInfo);
+    drawPlane(gl);
 }
 
 function drawCube(gl){
     setPosition(gl,CubeVertices,3,gl.FLOAT,CubeVertexIndices,CubeNormals);
     setOnecolor(gl,[1.0, 0.0, 0.0, 1.0],CubeVertices.length/3);
-    setPointLight(gl);
+    setPointLight(gl,lightPos);
     
     mvBox&&gl.uniformMatrix4fv(
         programInfo.uniformLocations.mvMatrixFromLight ,
@@ -80,7 +81,7 @@ const PlaneNormal = [
 function drawPlane(gl){
     setPosition(gl,PlaneVertices,3,gl.FLOAT,null,PlaneNormal);
     setOnecolor(gl,[1.0, 1.0, 1.0, 1.0],6);
-    setPointLight(gl);
+    setPointLight(gl,lightPos);
     
     (mvPlane)&&gl.uniformMatrix4fv(
             programInfo.uniformLocations.mvMatrixFromLight ,
@@ -97,11 +98,9 @@ function drawShadow(gl, rotation) {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     useProgram(gl, gl.shadowProgram);
     
-    mvBox = setMVP(gl, rotation, [0.0, 14.0, 0.0]);
-    setPosition(gl,CubeVertices,3,gl.FLOAT,CubeVertexIndices,CubeNormals);
-    gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
+    mvBox = setMVP(gl, rotation, lightPos);
+    drawCube(gl);
 
-    mvPlane = setMVP(gl,0, [0.0, 14.0, 0.0]);
-    setPosition(gl,PlaneVertices,3,gl.FLOAT,null,PlaneNormal);
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    mvPlane = setMVP(gl,0, lightPos);
+    drawPlane(gl);
 }

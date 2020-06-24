@@ -23,6 +23,7 @@ var sfsSource =`
     attribute vec4 aVertexPosition;
     attribute vec4 aVertexColor;
     attribute vec4 aNormal;
+    attribute vec3 eyeP;
 
     uniform mat4 uNormalMatrix;
     uniform mat4 uModelMatrix;
@@ -37,7 +38,6 @@ var sfsSource =`
     varying lowp vec4 vColor;
     varying vec4 v_PositionFromLight;
     void main(void) {
-      vec3 eyeP = vec3(0.0, 14.0, 0.0);
       gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
       
       vec4 vertexPosition = uModelMatrix * aVertexPosition;

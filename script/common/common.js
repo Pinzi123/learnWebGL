@@ -6,6 +6,7 @@ let programInfo = {
         vertexPosition: null,
         textureCoord: null,
         vertexColor: null,
+        eyePosition: null,
     },
     uniformLocations: {
         projectionMatrix: null,
@@ -28,6 +29,7 @@ function useProgram(gl,shaderProgram){
             vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
             textureCoord: gl.getAttribLocation(shaderProgram, "aTextureCoord"),
             vertexColor: gl.getAttribLocation(shaderProgram, "aVertexColor"),
+            eyePosition: gl.getAttribLocation(shaderProgram, "eyeP"),
         },
         uniformLocations: {
             projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
@@ -312,7 +314,7 @@ function setPosition(gl, data, num, type, indices=null,normals=null){
 }
 
 
-function setMVP(gl, rotation=0, eye=[0.0,5.0,-6.0], center=[0.0,0.0,1.0], up=[0.0,1.0,0.0]){
+function setMVP(gl, rotation=0, eye=[0.0,5.0,-6.0], center=[0.0,0.0,-1.0], up=[0.0,1.0,0.0]){
   
   const fieldOfView = 45 * Math.PI / 180;   // in radians
   const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
@@ -358,7 +360,7 @@ function setMVP(gl, rotation=0, eye=[0.0,5.0,-6.0], center=[0.0,0.0,1.0], up=[0.
 
   if(programInfo.uniformLocations.normalMatrix){
     const normalMatrix = mat4.create();
-    mat4.invert(normalMatrix, modelViewMatrix);
+    mat4.invert(normalMatrix, modelMatrix);
     mat4.transpose(normalMatrix, normalMatrix);
     gl.uniformMatrix4fv(
       programInfo.uniformLocations.normalMatrix,
@@ -372,8 +374,10 @@ function setMVP(gl, rotation=0, eye=[0.0,5.0,-6.0], center=[0.0,0.0,1.0], up=[0.
       false,
       modelMatrix);
   }
-  
 
+  if(programInfo.attribLocations.eyePosition){
+    gl.uniform3f(programInfo.uniformLocations.eyePosition, ...eye);
+  }
   return modelViewMatrix;
       
 }
@@ -460,11 +464,11 @@ function initFramebufferObject(gl) {
 }
 
 
-function setPointLight(gl){
+function setPointLight(gl,lightPosition=[1.0, 14.0, 0.0]){
     // Set the light color (white)
     gl.uniform3f(programInfo.uniformLocations.lightColor, 1.0, 1.0, 1.0);
     // Set the light direction (in the world coordinate)
-    gl.uniform3f(programInfo.uniformLocations.lightPosition, 1.0, 14.0, 0.0);
+    gl.uniform3f(programInfo.uniformLocations.lightPosition, ...lightPosition);
     // Set the ambient light
     gl.uniform3f(programInfo.uniformLocations.ambientLight, 0.2, 0.2, 0.2);
   }
