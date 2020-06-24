@@ -1,6 +1,5 @@
  
-var OFFSCREEN_WIDTH = 512, OFFSCREEN_HEIGHT = 512,cubeRotation=0;
-const lightPos =  [0.0, 14.0, 0.0];
+var OFFSCREEN_WIDTH = 512, OFFSCREEN_HEIGHT = 512;
 main();
 
 function main() {
@@ -17,38 +16,50 @@ function main() {
     useProgram(gl,gl.program);
     // Initialize framebuffer object (FBO)  
     var fbo = initFramebufferObject(gl);
+    var fbo2 = initFramebufferObject(gl);
     if (!fbo) {
         console.log('Failed to initialize frame buffer object');
         return;
     }
     gl.activeTexture(gl.TEXTURE0); // Set a texture object to the texture unit
-    gl.bindTexture(gl.TEXTURE_2D, fbo.texture);
     gl.clearColor(0, 0, 0, 1);
     gl.enable(gl.DEPTH_TEST);
+
     initTextures(gl,"./img/zz.jpg").then((texture)=>{
-      drawPlane(gl, texture);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+        gl.uniform1i(
+            gl.getUniformLocation(gl.program,"hh"),
+            false);
+        drawPlane(gl, texture);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo2);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);//要在清除前绑定
+        gl.uniform1i(
+            gl.getUniformLocation(gl.program,"hh"),
+            true);
+        drawPlane(gl, fbo.texture);
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);//要在clear前bindFramebuffer
+        gl.uniform1i(
+            gl.getUniformLocation(gl.program,"hh"),
+            false);
+        drawPlane(gl, fbo2.texture);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        gl.uniform1i(
+            gl.getUniformLocation(gl.program,"hh"),
+            true);
+        drawPlane(gl, fbo.texture, true);
     })
 
 }
 
 
-function drawScene(gl) {
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);   
-    gl.viewport(0, 0, OFFSCREEN_HEIGHT, OFFSCREEN_HEIGHT);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    useProgram(gl, gl.program);
-    gl.uniform1i(programInfo.uniformLocations.shadowMap, 0);
-
-    setMVP(gl,0);
-    drawPlane(gl);
-}
-
-
 const PlaneVertices = [
-    2.0,  2.0, 0.0,
-   -2.0,  2.0, 0.0,
-    2.0, -2.0, 0.0,
-   -2.0, -2.0, 0.0,
+    2.5,  2.5, 0.0,
+   -2.5,  2.5, 0.0,
+    2.5, -2.5, 0.0,
+   -2.5, -2.5, 0.0,
  ];
 
 
@@ -60,8 +71,16 @@ const PlaneTexture= [
   ];
 
  
-function drawPlane(gl, texture){
-    setPosition(gl,PlaneVertices,3,gl.FLOAT,null,null,PlaneTexture);
+function drawPlane(gl, texture,flag = false){
+    if(flag)
+        setPosition(gl,PlaneVertices,3,gl.FLOAT,null,null,PlaneTexture);
+    else
+        setPosition(gl,PlaneVertices,3,gl.FLOAT,null,null,[
+            1.0,  1.0,
+            0.0,  1.0, 
+            1.0,  0.0,
+            0.0,  0.0,
+          ]);
     setTexture(gl,texture);
     setMVP(gl, 0, [0.0,0.0,6.0], [0.0,0.0,-1.0],[0.0,1.0,0.0]);
     {
