@@ -34,7 +34,7 @@
     // TextureLoader创建一个纹理加载器对象，可以加载图片作为几何体纹理
     var textureLoader = new THREE.TextureLoader();
     // 执行load方法，加载纹理贴图成功后，返回一个纹理对象Texture
-    textureLoader.load('./p.jpg', function (texture) {
+    textureLoader.load('./img/p.jpg', function (texture) {
       texture.wrapS = THREE.RepeatWrapping;
       texture.wrapT = THREE.RepeatWrapping;
       // texture.repeat.set(2, 2);

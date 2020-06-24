@@ -296,7 +296,7 @@ function setOnecolor(gl, color, num){
         programInfo.attribLocations.vertexColor);
 }
 
-function setPosition(gl, data, num, type, indices=null,normals=null){
+function setPosition(gl, data, num, type, indices=null,normals=null,texs=null){
     initArrayBuffer(gl, "aVertexPosition", 
         new Float32Array(data), num, type);
     if(indices&&indices["length"]){
@@ -311,6 +311,12 @@ function setPosition(gl, data, num, type, indices=null,normals=null){
         initArrayBuffer(gl, "aNormal", 
             new Float32Array(normals), num, type);
     }
+
+    if(texs&&texs["length"]){
+      initArrayBuffer(gl, "aTextureCoord", 
+        new Float32Array(texs), 2, type);
+    }
+
 }
 
 
@@ -383,7 +389,7 @@ function setMVP(gl, rotation=0, eye=[0.0,5.0,-6.0], center=[0.0,0.0,-1.0], up=[0
 }
 
 
-function setTexture(gl,programInfo,texture){
+function setTexture(gl,texture){
     // Tell WebGL we want to affect texture unit 0
     gl.activeTexture(gl.TEXTURE0);
 

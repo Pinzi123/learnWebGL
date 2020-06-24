@@ -249,7 +249,7 @@ function initBuffers(gl,positions,colorCoordinates,textureCoordinates) {
       1.0,  0.0,
       0.0,  0.0,
       1.0,  1.0,
-      0.0,  1.0,
+      0.0,  1.0, 
     ];
   
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordinates),gl.STATIC_DRAW);
@@ -285,7 +285,7 @@ function initArrayBuffer(gl, attribute, data, num, type) {
   return true;
 }
 
-function setMVP(gl,programInfo,rotation=0, eye=[0.0,0.0,-6.0], center=[0.0,0.0,1.0], up=[0.0,1.0,0.0]){
+function setMVP(gl,programInfo,rotation=0, eye=[0.0,0.0,6.0], center=[0.0,0.0,-1.0], up=[0.0,1.0,0.0]){
   
   const fieldOfView = 45 * Math.PI / 180;   // in radians
   const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
