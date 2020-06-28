@@ -61,7 +61,7 @@ function drawBall(ball, gl){
     setOnecolor(gl,[1.0, 0.0, 0.0, 1.0],ball.vertexCount);
     setPointLight(gl,lightPos);
     
-    gl.drawElements(gl.TRIANGLES, ball.vertexCount, gl.UNSIGNED_SHORT, 0);
+    gl.drawArrays(gl.TRIANGLES, 0, ball.vertexCount);
 
 }
 
