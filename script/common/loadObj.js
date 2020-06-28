@@ -9,20 +9,26 @@ class Object3D{
 
 function loadObjFile(url)
 {
+    let resolve,reject;
+    let promise = new Promise((res,rej)=>{
+        resolve = res;
+        reject = rej;
+    })
     var req = new XMLHttpRequest();
-    req.onreadystatechange = function () { processLoadObj(req) };
+    req.onreadystatechange = function () { processLoadObj(req,resolve) };
     req.open("GET", url, true);
     req.responseType = "text";
     req.send(null);
+    return promise;
 }
 
-function processLoadObj(req)
+function processLoadObj(req,resolve)
 {
     if (req.readyState == 4) 
     {
         var objStr = req.responseText;	       
         var dataTemp=fromObjStrToObjectData(objStr);	
-        createBall(dataTemp);                     
+        resolve(dataTemp);                     
     }
 } 
 
