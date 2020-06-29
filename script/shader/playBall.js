@@ -14,38 +14,29 @@ uniform vec3 uLightColor;
 uniform vec3 uLightPosition;
 uniform vec3 uAmbientLight;
 uniform bool hh;
-varying lowp vec4 vColor;
+
+attribute vec2 aTextureCoord;
+varying highp vec2 vTextureCoord;
 void main(void) {
-  vec4 pos = vec4(aVertexPosition.xyzw);
-  if(hh)
-    pos = vec4(aVertexPosition.x, -5.0 -(5.0 + aVertexPosition.y), aVertexPosition.z, aVertexPosition.w);
-
-  gl_Position = uProjectionMatrix * uModelViewMatrix * pos;
   
-  vec4 vertexPosition = uModelMatrix * pos;
-  vec3 eyeDirection = normalize(eyeP - vec3(vertexPosition));
-  vec3 lightDirection = normalize(uLightPosition - vec3(vertexPosition));
-  vec3 normal = normalize(vec3(uNormalMatrix * aNormal));
+  vec4 pos = uModelViewMatrix * aVertexPosition;
+  if(hh)
+    pos = vec4(pos.x, -10.0 , pos.z, pos.w);
 
-  vec3 diffuse = uLightColor * aVertexColor.rgb * max(dot(lightDirection,normal), 0.0);
-  vec3 h = (eyeDirection + lightDirection)/length(eyeDirection + lightDirection);
-  vec3 specular = uLightColor * aVertexColor.rgb * pow(max(dot(normal,h), 0.0),2.0);
-  vec3 ambient = uAmbientLight * aVertexColor.rgb;
-  vColor = vec4(ambient + diffuse + specular, aVertexColor.a);
+  gl_Position = uProjectionMatrix * pos;
+  
+  vTextureCoord = aTextureCoord;
 }
 `;
 const fsSource = `
 precision mediump float;
-
-varying lowp vec4 vColor;
+varying highp vec2 vTextureCoord;
+uniform sampler2D uSampler;
+uniform bool hh;
 void main(void) {
-    gl_FragColor = vColor;
-}
-`;
-
-const shaderSingleColor = `
-void main(void)
-{
-gl_FragColor = vec4(1.00, 0.00, 0.00, 0.3);
+  if(hh)
+    gl_FragColor = vec4(texture2D(uSampler, vTextureCoord).rgb, 0.1);
+  else
+    gl_FragColor = texture2D(uSampler, vTextureCoord);
 }
 `;
