@@ -13,12 +13,16 @@ uniform mat4 uMvMatrixFromLight;
 uniform vec3 uLightColor;
 uniform vec3 uLightPosition;
 uniform vec3 uAmbientLight;
-
+uniform bool hh;
 varying lowp vec4 vColor;
 void main(void) {
-  gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+  vec4 pos = vec4(aVertexPosition.xyzw);
+  if(hh)
+    pos = vec4(aVertexPosition.x, -5.0 -(5.0 + aVertexPosition.y), aVertexPosition.z, aVertexPosition.w);
+
+  gl_Position = uProjectionMatrix * uModelViewMatrix * pos;
   
-  vec4 vertexPosition = uModelMatrix * aVertexPosition;
+  vec4 vertexPosition = uModelMatrix * pos;
   vec3 eyeDirection = normalize(eyeP - vec3(vertexPosition));
   vec3 lightDirection = normalize(uLightPosition - vec3(vertexPosition));
   vec3 normal = normalize(vec3(uNormalMatrix * aNormal));
