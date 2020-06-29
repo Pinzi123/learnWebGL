@@ -21,7 +21,7 @@ void main(void) {
   
   vec4 pos = uModelViewMatrix * aVertexPosition;
   if(hh)
-    pos = vec4(pos.x, -10.0 , pos.z, pos.w);
+    pos = vec4(pos.x, (-5.0-(pos.y+5.0)) , pos.z, pos.w);
 
   gl_Position = uProjectionMatrix * pos;
   
