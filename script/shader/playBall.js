@@ -22,9 +22,8 @@ varying highp vec2 vTextureCoord;
 void main(void) {
   float planeY = -5.0;
   vec4 pos = uModelViewMatrix * aVertexPosition;
-  if(hh!=0.0)
+  if(hh!=0.0&&hh!=0.1)
     pos.y += time;
-  
   if(hh==1.0)
     pos = vec4(pos.x, (pos.y-(pos.y-planeY)*2.0) , pos.z, pos.w);
   gl_Position = uProjectionMatrix * pos;
@@ -38,8 +37,8 @@ varying highp vec2 vTextureCoord;
 uniform sampler2D uSampler;
 uniform float hh;
 void main(void) {
-  if(hh==1.0)
-    gl_FragColor = vec4(texture2D(uSampler, vTextureCoord).rgb, 0.5);
+  if(hh==0.1)
+    gl_FragColor = vec4(texture2D(uSampler, vTextureCoord).rgb, 0.9);
   else
     gl_FragColor = texture2D(uSampler, vTextureCoord);
 }

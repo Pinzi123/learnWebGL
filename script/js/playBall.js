@@ -51,6 +51,8 @@ function drawScene(gl,ball, rotation) {
     gl.enable(gl.STENCIL_TEST);
     gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE);  
 
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     //上升
     if(time>5) flag = -0.01;
     if(time<0) flag = 0.01;
@@ -66,20 +68,26 @@ function drawScene(gl,ball, rotation) {
     setMVP(gl,0,[0.0,10.0,-32.0]);
     drawPlane(gl);
 
-    //绘制镜像球
+    //绘制镜像球,镜像球不能设置透明度，它会和自己混色
     gl.enable(gl.DEPTH_TEST);
     gl.stencilFunc(gl.EQUAL,1, 1); 
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
     gl.uniform1f(
         gl.getUniformLocation(gl.program,"hh"),
         1.0);
     setMVP(gl, rotation, [0.0,10.0,-32.0]);
     drawBall(ball,gl);
 
+    gl.disable(gl.STENCIL_TEST);
+    //绘制地板,用透明的地板和不透明的镜像球混色
+      gl.uniform1f(
+        gl.getUniformLocation(gl.program,"hh"),
+        0.1);
+    setMVP(gl,0,[0.0,10.0,-32.0]);
+    drawPlane(gl);
+
     //绘制真实的球
     gl.disable(gl.BLEND);
-    gl.disable(gl.STENCIL_TEST);
     gl.uniform1f(
         gl.getUniformLocation(gl.program,"hh"),
         -1.0);
