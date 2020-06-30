@@ -1,5 +1,5 @@
 const canvas = document.querySelector('#glcanvas');
-const gl = canvas.getContext('webgl');
+const gl = canvas.getContext('webgl',{stencil: true});
 
 let programInfo = {
     attribLocations: {
