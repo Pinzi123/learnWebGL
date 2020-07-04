@@ -243,23 +243,37 @@ const CubeNormals =[
 ];
 
 function initArrayBuffer(gl, attribute, data, num, type) {
-  // Create a buffer object
+  // 创建缓冲区对象
   var buffer = gl.createBuffer();
   if (!buffer) {
     console.log('Failed to create the buffer object');
     return false;
   }
-  // Write date into the buffer object
+  // 将缓存区对象绑定到target上
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  // 将顶点相关数据写到缓存区对象
+  // - gl.STATIC_DRAW: 缓冲区的内容可能经常使用，而不会经常更改。内容被写入缓冲区，但不被读取。
+  // - gl.DYNAMIC_DRAW: 缓冲区的内容可能经常被使用，并且经常更改。内容被写入缓冲区，但不被读取。
+  // - gl.STREAM_DRAW: 缓冲区的内容可能不会经常使用。内容被写入缓冲区，但不被读取。
   gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-  // Assign the buffer object to the attribute variable
+  // 获取对应的attribute变量
   var a_attribute = gl.getAttribLocation(gl.program, attribute);
+  // 判断着色器是否存在该变量
   if (a_attribute < 0) {
     console.log('Failed to get the storage location of ' + attribute);
     return false;
   }
+  //将缓存区对象分配给对应的attribute变量
+  // void gl.vertexAttribPointer(index, size, type, normalized, stride, offset);
+  // - index：指定要修改的顶点属性的索引。
+  // - size：指定每个顶点属性的组成数量，必须是1，2，3或4。
+  // - type：指定数组中每个元素的数据类型可能是：gl.BYTE、gl.SHORT、gl.UNSIGNED_BYTE，gl.UNSIGNED_SHORT、gl.FLOAT
+  // - normalized：当转换为浮点数时是否应该将整数数值归一化到特定的范围。
+  // - stride：一个GLsizei，以字节为单位指定stride个为一组处理。不能大于255。如果stride为0，则假定该属性是紧密打包的，即不交错属
+  // 性，每个属性在一个单独的块中，下一个顶点的属性紧跟当前顶点之后。
+  // - offset：这一组偏移offset个数据再赋值。必须是类型的字节长度的倍数。
   gl.vertexAttribPointer(a_attribute, num, type, false, 0, 0);
-  // Enable the assignment of the buffer object to the attribute variable
+  // 开启attribute对象
   gl.enableVertexAttribArray(a_attribute);
 
   return true;
