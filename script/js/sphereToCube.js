@@ -35,12 +35,14 @@ function main() {
         drawScene(gl, cubeRotation);
         cubeRotation += 0.01;
         requestAnimationFrame(render);
+        gl.uniform1f(
+            gl.getUniformLocation(gl.program,"hh"),
+            0.1);
     }
     requestAnimationFrame(render);
 
 }
 
-let time=0;
 let eye =  new Vector3([0.0,5.0,-6.0]);
 function drawScene(gl, rotation) {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);   
@@ -48,10 +50,9 @@ function drawScene(gl, rotation) {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     useProgram(gl, gl.program);
     gl.uniform1i(programInfo.uniformLocations.shadowMap, 0);
-    time += 0.1;
     let mat = new Matrix4();
-    mat.rotate(time,0,1,0);
-    
+    mat.rotate(cubeRotation,0,1,0);
+
     setMVP(gl, rotation, mat.multiplyVector3(eye).elements);
     drawCube(gl);
 
@@ -63,7 +64,9 @@ function drawCube(gl){
     setPosition(gl,SpherePos.coords,3,gl.FLOAT,SpherePos.indices,SpherePos.normals);
     setOnecolor(gl,[1.0, 0.0, 0.0, 1.0],SpherePos.size);
     setPointLight(gl,lightPos);
-    
+    gl.uniform1f(
+        gl.getUniformLocation(gl.program,"progress"),
+        cubeRotation);
     mvBox&&gl.uniformMatrix4fv(
         programInfo.uniformLocations.mvMatrixFromLight ,
         false,
@@ -86,7 +89,9 @@ function drawPlane(gl){
     setPosition(gl,PlaneVertices,3,gl.FLOAT,null,PlaneNormal);
     setOnecolor(gl,[1.0, 1.0, 1.0, 1.0],6);
     setPointLight(gl,lightPos);
-    
+    gl.uniform1f(
+        gl.getUniformLocation(gl.program,"progress"),
+        0);
     (mvPlane)&&gl.uniformMatrix4fv(
             programInfo.uniformLocations.mvMatrixFromLight ,
             false,
