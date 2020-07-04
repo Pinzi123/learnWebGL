@@ -42,35 +42,34 @@ var sfsSource =`
 
     varying vec4 vColor;
     varying vec4 v_PositionFromLight;
-    const float rrr = 0.73;
+    const float rrr = 0.50;
     uniform float progress;
     void main(void) {
       vec4 aCubePosition = vec4(aVertexPosition.x, aVertexPosition.y ,aVertexPosition.z ,aVertexPosition.w);
       if(aVertexPosition.x>rrr){
-        aCubePosition.w = aCubePosition.x/rrr;
+        aCubePosition.x = rrr;
       }
       if(aVertexPosition.x<-rrr){
-        aCubePosition.w = -aCubePosition.x/rrr;
+        aCubePosition.x = -rrr;
       }
-
       if(aVertexPosition.y>rrr){
-        aCubePosition.w = aCubePosition.y/rrr;
+        aCubePosition.y = rrr;
       }
       if(aVertexPosition.y<-rrr){
-        aCubePosition.w = -aCubePosition.y/rrr;
+        aCubePosition.y = -rrr;
       }
-
       if(aVertexPosition.z>rrr){
-        aCubePosition.w = aCubePosition.z/rrr;
+        aCubePosition.z = rrr;
       }
       if(aVertexPosition.z<-rrr){
-        aCubePosition.w = -aCubePosition.z/rrr;
+        aCubePosition.z = -rrr;
       }
-
-      if(progress>0.0)
-        gl_Position = uProjectionMatrix * uModelViewMatrix *  aCubePosition;
+      if(progress>0.0&&progress<1.0)
+        gl_Position = uProjectionMatrix * uModelViewMatrix *  mix(aVertexPosition, aCubePosition, progress);
+      else if(progress==0.0)
+        gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
       else
-        gl_Position = uProjectionMatrix * uModelViewMatrix *  aVertexPosition;
+        gl_Position = uProjectionMatrix * uModelViewMatrix *  mix(aVertexPosition, aCubePosition, 1.0);
 
       vec4 vertexPosition = uModelMatrix * aVertexPosition;
       vec3 eyeDirection = normalize(eyeP - vec3(vertexPosition));
