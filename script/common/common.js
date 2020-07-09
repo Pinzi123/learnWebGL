@@ -42,6 +42,9 @@ function useProgram(gl,shaderProgram){
             lightColor: gl.getUniformLocation(shaderProgram, 'uLightColor'),
             lightPosition: gl.getUniformLocation(shaderProgram, 'uLightPosition'),
             ambientLight: gl.getUniformLocation(shaderProgram, 'uAmbientLight'),
+            uSampler0: gl.getUniformLocation(shaderProgram, 'uSampler'),
+            uSampler1: gl.getUniformLocation(shaderProgram, 'uSampler1'),
+            uSampler2: gl.getUniformLocation(shaderProgram, 'uSampler2'),
             shadowMap: gl.getUniformLocation(shaderProgram, 'uShadowMap'),
         },
     };
@@ -404,16 +407,10 @@ function setMVP(gl, rotation=0, eye=[0.0,5.0,-6.0], center=[0.0,0.0,-1.0], up=[0
 }
 
 
-function setTexture(gl,texture){
-    // Tell WebGL we want to affect texture unit 0
-    gl.activeTexture(gl.TEXTURE0);
-
-    // Bind the texture to texture unit 0
-  
+function setTexture(gl,texture,index=0){
+    gl.activeTexture(gl["TEXTURE"+index]);
     gl.bindTexture(gl.TEXTURE_2D, texture);
-  
-    // Tell the shader we bound the texture to texture unit 0
-    gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
+    gl.uniform1i(programInfo.uniformLocations["uSampler"+index], index);
 }
 
 

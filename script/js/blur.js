@@ -11,8 +11,16 @@ function main() {
     }
 
 
-    const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
+    const shaderProgram = initShaderProgram(gl, vsSource, BFsSource);
     gl.program = shaderProgram;
+    
+    const blurShaderProgram = initShaderProgram(gl, vsSource, BlurFsSource);
+    gl.blurProgram = blurShaderProgram;
+
+    const mShaderProgram = initShaderProgram(gl, vsSource, MFsSource);
+    gl.mProgram = mShaderProgram;
+
+
     useProgram(gl,gl.program);
     // Initialize framebuffer object (FBO)  
     var fbo = initFramebufferObject(gl);
@@ -25,7 +33,18 @@ function main() {
     gl.clearColor(0, 0, 0, 1);
     gl.enable(gl.DEPTH_TEST);
 
-    initTextures(gl,"./img/zz.jpg").then((texture)=>{
+    initTextures(gl,"./img/f.jpg").then((texture)=>{
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo2);
+        gl.uniform1i(
+            gl.getUniformLocation(gl.program,"hh"),
+            false);
+        drawPlane(gl, texture);
+        blur(fbo2.texture,texture);
+        // drawPlane2(gl,texture,fbo.texture);
+    })
+
+    const blur=(texture,realT)=>{
+        useProgram(gl,gl.blurProgram);
         gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
         gl.uniform1i(
             gl.getUniformLocation(gl.program,"hh"),
@@ -49,8 +68,8 @@ function main() {
         gl.uniform1i(
             gl.getUniformLocation(gl.program,"hh"),
             true);
-        drawPlane(gl, fbo.texture, true);
-    })
+        drawPlane2(gl, fbo.texture,realT, true);
+    }
 
 }
 
@@ -89,3 +108,17 @@ function drawPlane(gl, texture,flag = false){
         gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
     }
 }
+
+function drawPlane2(gl, texture1,texture2){
+    useProgram(gl,gl.mProgram);
+    setPosition(gl,PlaneVertices,3,gl.FLOAT,null,null,PlaneTexture);
+    // setTexture(gl,texture1,0);
+    setTexture(gl,texture2,1);
+    setMVP(gl, 0, [0.0,0.0,6.0], [0.0,0.0,-1.0],[0.0,1.0,0.0]);
+    {
+        const offset = 0;
+        const vertexCount = 4;
+        gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
+    }
+}
+
