@@ -1,6 +1,7 @@
-var svsSource = `
-    attribute vec4 aVertexPosition;
-    attribute vec4 aVertexColor;
+var svsSource = `#version 300 es
+    precision mediump float;
+    in vec4 aVertexPosition;
+    in vec4 aVertexColor;
     uniform mat4 uModelViewMatrix;
     uniform mat4 uProjectionMatrix;
     void main(void) {
@@ -9,21 +10,23 @@ var svsSource = `
 `;
 
 // Fragment shader program for generating a shadow map
-var sfsSource =`
+var sfsSource =`#version 300 es
     #ifdef GL_ES
     precision mediump float;
     #endif
+    out vec4 FragColor;
     void main() {
-        gl_FragColor = vec4(gl_FragCoord.z, 0.0, 0.0, 1.0);
+        FragColor = vec4(gl_FragCoord.z, 0.0, 0.0, 1.0);
     }
 `;
 
 
-  const vsSource = `
-    attribute vec4 aVertexPosition;
-    attribute vec4 aVertexColor;
-    attribute vec4 aNormal;
-    attribute vec3 eyeP;
+  const vsSource = `#version 300 es
+    precision mediump float;
+    in vec4 aVertexPosition;
+    in vec4 aVertexColor;
+    in vec4 aNormal;
+    in vec3 eyeP;
 
     uniform mat4 uNormalMatrix;
     uniform mat4 uModelMatrix;
@@ -35,8 +38,8 @@ var sfsSource =`
     uniform vec3 uLightPosition;
     uniform vec3 uAmbientLight;
 
-    varying lowp vec4 vColor;
-    varying vec4 v_PositionFromLight;
+    out vec4 vColor;
+    out vec4 v_PositionFromLight;
     void main(void) {
       gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
       
@@ -56,17 +59,33 @@ var sfsSource =`
 
   // Fragment shader program
 
-  const fsSource = `
+  const fsSource = `#version 300 es
     precision mediump float;
     
-    varying lowp vec4 vColor;
+    in vec4 vColor;
     uniform sampler2D uShadowMap;
-    varying vec4 v_PositionFromLight;
+    in vec4 v_PositionFromLight;
+
+    uniform vec4 uFogColor;
+    uniform vec3 uFogInfo;
+
+    uniform mat4 uProjectionMatrix;
+    uniform mat4 uViewMatrix;
+
+    out vec4 FragColor;
     void main(void) {
-        vec3 shadowCoord = (v_PositionFromLight.xyz/v_PositionFromLight.w)/2.0 + 0.5;
-        vec4 rgbaDepth = texture2D(uShadowMap, shadowCoord.xy);
-        float depth =  rgbaDepth.r;
-        float visibility = (shadowCoord.z > depth + 0.0005) ? 0.5 : 1.0;
-        gl_FragColor = vec4(vColor.rgb * visibility, vColor.a);
+      mat4 mvp = inverse(uProjectionMatrix * uViewMatrix);    
+      
+      vec4 worldPos =  mvp * vec4((gl_FragCoord.xyz/gl_FragCoord.w)*2.0-1.0, 1.0);
+      float fogDensity = (uFogInfo[2] - worldPos.y) / (uFogInfo[2] - uFogInfo[1]);
+      fogDensity = clamp(fogDensity * uFogInfo[0], 0.0, 1.0); ;
+
+      vec3 shadowCoord = (v_PositionFromLight.xyz/v_PositionFromLight.w)/2.0 + 0.5;
+      vec4 rgbaDepth = texture(uShadowMap, shadowCoord.xy);
+      float depth =  rgbaDepth.r;
+      float visibility = (shadowCoord.z > depth + 0.0005) ? 0.5 : 1.0;
+      vec4 finalColor = vec4(vColor.rgb * visibility, vColor.a);
+
+      FragColor = mix(finalColor,uFogColor, fogDensity);
     }
   `;

@@ -13,6 +13,7 @@ let programInfo = {
         projectionMatrix: null,
         modelViewMatrix: null,
         modelMatrix: null,
+        viewMatrix: null,
         normalMatrix: null,
         mvMatrixFromLight: null,
 
@@ -35,6 +36,7 @@ function useProgram(gl,shaderProgram){
         uniformLocations: {
             projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
             modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
+            viewMatrix: gl.getUniformLocation(shaderProgram, 'uViewMatrix'),
             modelMatrix: gl.getUniformLocation(shaderProgram, 'uModelMatrix'),
             normalMatrix: gl.getUniformLocation(shaderProgram, 'uNormalMatrix'),
             mvMatrixFromLight: gl.getUniformLocation(shaderProgram, 'uMvMatrixFromLight'),
@@ -369,6 +371,13 @@ function setMVP(gl, rotation=0, eye=[0.0,5.0,-6.0], center=[0.0,0.0,-1.0], up=[0
 
   const viewMatrix = mat4.create();
   mat4.lookAt(viewMatrix, eye, center, up);
+
+  if(programInfo.uniformLocations.viewMatrix){
+    gl.uniformMatrix4fv(
+      programInfo.uniformLocations.viewMatrix,
+      false,
+      viewMatrix);
+  }
 
   let modelViewMatrix = mat4.create();
 

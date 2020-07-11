@@ -32,6 +32,7 @@ function main() {
     const render = (now) => {
         gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
         drawShadow(gl,cubeRotation);
+       
         drawScene(gl, cubeRotation);
         cubeRotation += 0.01;
         requestAnimationFrame(render);
@@ -47,7 +48,7 @@ function drawScene(gl, rotation) {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     useProgram(gl, gl.program);
     gl.uniform1i(programInfo.uniformLocations.shadowMap, 0);
-
+    renderFog(gl);
     setMVP(gl, rotation);
     drawCube(gl);
 
@@ -103,4 +104,18 @@ function drawShadow(gl, rotation) {
 
     mvPlane = setMVP(gl,0, lightPos);
     drawPlane(gl);
+}
+
+function renderFog(gl){
+    const fogDesity = 0.5;
+    const fogColor = [0.5, 0.2, 0.2, 1.0];
+    const fogStart = 0.0;
+    const fogEnd = 12.0;
+    gl.uniform3fv(
+        gl.getUniformLocation(gl.program, 'uFogInfo'),
+        [fogDesity,fogStart,fogEnd]);
+
+    gl.uniform4fv(
+        gl.getUniformLocation(gl.program, 'uFogColor'),
+        fogColor);
 }
