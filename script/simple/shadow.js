@@ -109,13 +109,13 @@ function drawShadow(gl, rotation) {
 function renderFog(gl){
     const fogDesity = 0.5;
     const fogColor = [0.5, 0.2, 0.2, 1.0];
-    const fogStart = 0.0;
-    const fogEnd = 12.0;
-    gl.uniform3fv(
+    const fogStart = -15.0;
+    const fogEnd = 10.0;
+    gl.uniform1fv(
         gl.getUniformLocation(gl.program, 'uFogInfo'),
-        [fogDesity,fogStart,fogEnd]);
+        new Float32Array([fogDesity,fogStart,fogEnd]));
 
-    gl.uniform4fv(
+    gl.uniform4f(
         gl.getUniformLocation(gl.program, 'uFogColor'),
-        fogColor);
+        ...fogColor);
 }

@@ -67,18 +67,22 @@ var sfsSource =`#version 300 es
     in vec4 v_PositionFromLight;
 
     uniform vec4 uFogColor;
-    uniform vec3 uFogInfo;
+    uniform float uFogInfo[3];
 
     uniform mat4 uProjectionMatrix;
     uniform mat4 uViewMatrix;
 
     out vec4 FragColor;
     void main(void) {
-      mat4 mvp = inverse(uProjectionMatrix * uViewMatrix);    
-      
-      vec4 worldPos =  mvp * vec4((gl_FragCoord.xyz/gl_FragCoord.w)*2.0-1.0, 1.0);
+      mat4 vp = inverse(uProjectionMatrix * uViewMatrix);  
+      vec4 worldPos =  vp * vec4((gl_FragCoord.xyz/gl_FragCoord.w)*2.0-1.0, 1.0);
+      worldPos = worldPos/worldPos.w;
+
       float fogDensity = (uFogInfo[2] - worldPos.y) / (uFogInfo[2] - uFogInfo[1]);
-      fogDensity = clamp(fogDensity * uFogInfo[0], 0.0, 1.0); ;
+      if(worldPos.y<uFogInfo[1] || worldPos.y>uFogInfo[2])
+        fogDensity = 0.0;
+      else
+        fogDensity = clamp(uFogInfo[0]*fogDensity,0.0,1.0);
 
       vec3 shadowCoord = (v_PositionFromLight.xyz/v_PositionFromLight.w)/2.0 + 0.5;
       vec4 rgbaDepth = texture(uShadowMap, shadowCoord.xy);
