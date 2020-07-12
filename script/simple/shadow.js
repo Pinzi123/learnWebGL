@@ -51,7 +51,6 @@ function drawScene(gl, rotation) {
     renderFog(gl);
     setMVP(gl, rotation);
     drawCube(gl);
-
     setMVP(gl,0);
     drawPlane(gl);
 }
@@ -107,10 +106,10 @@ function drawShadow(gl, rotation) {
 }
 
 function renderFog(gl){
-    const fogDesity = 0.5;
-    const fogColor = [0.5, 0.2, 0.2, 1.0];
-    const fogStart = -15.0;
-    const fogEnd = 10.0;
+    const fogDesity = 1.0;
+    const fogColor = [1.0, 1.0, 1.0, 1.0];
+    const fogStart = -2.5;
+    const fogEnd = 1.5;
     gl.uniform1fv(
         gl.getUniformLocation(gl.program, 'uFogInfo'),
         new Float32Array([fogDesity,fogStart,fogEnd]));
