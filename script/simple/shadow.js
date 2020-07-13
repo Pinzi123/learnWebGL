@@ -28,7 +28,7 @@ function main() {
     gl.bindTexture(gl.TEXTURE_2D, fbo.texture);
     gl.clearColor(0, 0, 0, 1);
     gl.enable(gl.DEPTH_TEST);
-
+    
     const render = (now) => {
         gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
         drawShadow(gl,cubeRotation);
@@ -43,15 +43,25 @@ function main() {
 
 
 function drawScene(gl, rotation) {
+    let camera = new Camera(gl,gl.program);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);   
     gl.viewport(0, 0, OFFSCREEN_HEIGHT, OFFSCREEN_HEIGHT);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     useProgram(gl, gl.program);
     gl.uniform1i(programInfo.uniformLocations.shadowMap, 0);
-    renderFog(gl);
-    setMVP(gl, rotation);
+
+    this.renderFog(gl);
+    gl.uniform1i(
+        gl.getUniformLocation(gl.program,"isShadow"),
+        false);
+    camera.setRotation(rotation).setEye([0.0,5.0,-6.0]).update();
     drawCube(gl);
-    setMVP(gl,0);
+
+    this.renderFog(gl);
+    gl.uniform1i(
+        gl.getUniformLocation(gl.program,"isShadow"),
+        true);
+    camera.setRotation(0).setEye([0.0,5.0,-6.0]).update();
     drawPlane(gl);
 }
 
@@ -60,11 +70,6 @@ function drawCube(gl){
     setOnecolor(gl,[1.0, 0.0, 0.0, 1.0],CubeVertices.length/3);
     setPointLight(gl,lightPos);
     
-    mvBox&&gl.uniformMatrix4fv(
-        programInfo.uniformLocations.mvMatrixFromLight ,
-        false,
-        mvBox);
-        
     gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
 }
 
@@ -94,22 +99,25 @@ function drawPlane(gl){
 
 let mvPlane,mvBox;
 function drawShadow(gl, rotation) {
+    let camera = new Camera(gl,gl.shadowProgram);
     gl.viewport(0, 0, OFFSCREEN_HEIGHT, OFFSCREEN_HEIGHT);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     useProgram(gl, gl.shadowProgram);
     
-    mvBox = setMVP(gl, rotation, lightPos);
+    camera.setRotation(rotation).setEye(lightPos).update();
+    mvBox = camera.modelViewMatrix;
     drawCube(gl);
 
-    mvPlane = setMVP(gl,0, lightPos);
+    camera.setRotation(0).setEye(lightPos).update();
+    mvPlane = camera.modelViewMatrix;
     drawPlane(gl);
 }
 
 function renderFog(gl){
-    const fogDesity = 1.0;
+    const fogDesity = 0.5;
     const fogColor = [1.0, 1.0, 1.0, 1.0];
-    const fogStart = -2.5;
-    const fogEnd = 1.5;
+    const fogStart = -1.9;
+    const fogEnd = 3.5;
     gl.uniform1fv(
         gl.getUniformLocation(gl.program, 'uFogInfo'),
         new Float32Array([fogDesity,fogStart,fogEnd]));

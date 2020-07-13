@@ -408,9 +408,6 @@ function setMVP(gl, rotation=0, eye=[0.0,5.0,-6.0], center=[0.0,0.0,-1.0], up=[0
       modelMatrix);
   }
 
-  if(programInfo.attribLocations.eyePosition){
-    gl.uniform3f(programInfo.uniformLocations.eyePosition, ...eye);
-  }
   return modelViewMatrix;
       
 }

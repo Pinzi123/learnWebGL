@@ -26,7 +26,6 @@ var sfsSource =`#version 300 es
     in vec4 aVertexPosition;
     in vec4 aVertexColor;
     in vec4 aNormal;
-    in vec3 eyeP;
 
     uniform mat4 uNormalMatrix;
     uniform mat4 uModelMatrix;
@@ -39,6 +38,8 @@ var sfsSource =`#version 300 es
     uniform vec3 uAmbientLight;
     uniform mat4 uViewMatrix;
 
+    uniform vec3 eye;
+
     out vec4 vColor;
     out vec4 v_PositionFromLight;
     out vec4 v_Position;
@@ -46,7 +47,7 @@ var sfsSource =`#version 300 es
       gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
       
       vec4 vertexPosition = uModelMatrix * aVertexPosition;
-      vec3 eyeDirection = normalize(eyeP - vec3(vertexPosition));
+      vec3 eyeDirection = normalize(eye - vec3(vertexPosition));
       vec3 lightDirection = normalize(uLightPosition - vec3(vertexPosition));
       vec3 normal = normalize(vec3(uNormalMatrix * aNormal));
 
@@ -69,6 +70,7 @@ var sfsSource =`#version 300 es
     uniform sampler2D uShadowMap;
     in vec4 v_PositionFromLight;
 
+    uniform bool isShadow;
     uniform vec4 uFogColor;
     uniform float uFogInfo[3];
 
@@ -91,9 +93,10 @@ var sfsSource =`#version 300 es
       vec3 shadowCoord = (v_PositionFromLight.xyz/v_PositionFromLight.w)/2.0 + 0.5;
       vec4 rgbaDepth = texture(uShadowMap, shadowCoord.xy);
       float depth =  rgbaDepth.r;
-      float visibility = (shadowCoord.z > depth + 0.0005) ? 0.5 : 1.0;
+      float visibility = 1.0;
+      if(isShadow) visibility = (shadowCoord.z > depth ) ? 0.4 : 1.0;
       vec4 finalColor = vec4(vColor.rgb * visibility, vColor.a);
-
-      FragColor = mix(finalColor,uFogColor, fogDensity);
+      // FragColor = mix(finalColor,uFogColor, fogDensity);
+      FragColor = finalColor;
     }
   `;
