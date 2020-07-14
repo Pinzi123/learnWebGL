@@ -30,6 +30,7 @@ function main() {
         return;
     }
     gl.activeTexture(gl.TEXTURE0); // Set a texture object to the texture unit
+    gl.activeTexture(gl.TEXTURE1);
     gl.clearColor(0, 0, 0, 1);
     gl.enable(gl.DEPTH_TEST);
 
@@ -39,12 +40,18 @@ function main() {
             gl.getUniformLocation(gl.program,"hh"),
             false);
         drawPlane(gl, texture);
-        blur(fbo2.texture,texture);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        // drawPlane2(gl, fbo2.texture, texture, true);
+        // bloom效果
+        // blur(fbo2.texture,texture);
+        // 模糊效果
+        blur(texture);
         // drawPlane2(gl,texture,fbo.texture);
     })
 
     const blur=(texture,realT)=>{
         useProgram(gl,gl.blurProgram);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);//要在清除前绑定
         gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
         gl.uniform1i(
             gl.getUniformLocation(gl.program,"hh"),
@@ -65,10 +72,7 @@ function main() {
         drawPlane(gl, fbo2.texture);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        gl.uniform1i(
-            gl.getUniformLocation(gl.program,"hh"),
-            true);
-        drawPlane2(gl, fbo.texture,realT, true);
+        drawPlane2(gl, fbo.texture, realT, true);
     }
 
 }
@@ -112,7 +116,7 @@ function drawPlane(gl, texture,flag = false){
 function drawPlane2(gl, texture1,texture2){
     useProgram(gl,gl.mProgram);
     setPosition(gl,PlaneVertices,3,gl.FLOAT,null,null,PlaneTexture);
-    // setTexture(gl,texture1,0);
+    setTexture(gl,texture1,0);
     setTexture(gl,texture2,1);
     setMVP(gl, 0, [0.0,0.0,6.0], [0.0,0.0,-1.0],[0.0,1.0,0.0]);
     {
