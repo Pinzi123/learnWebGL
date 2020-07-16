@@ -43,6 +43,8 @@ var sfsSource =`#version 300 es
 
     out vec4 vColor;
     out vec4 v_PositionFromLight;
+    out vec4 v_Position;
+    out vec2 vTextureCoord;
     void main(void) {
       gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
       
@@ -57,6 +59,8 @@ var sfsSource =`#version 300 es
       vec3 ambient = uAmbientLight * aVertexColor.rgb;
       vColor = vec4(ambient + diffuse + specular, aVertexColor.a);
       v_PositionFromLight = uProjectionMatrix * uMvMatrixFromLight * aVertexPosition;
+      v_Position = vertexPosition;
+      vTextureCoord = aTextureCoord;
     }
   `;
 
@@ -68,6 +72,7 @@ var sfsSource =`#version 300 es
     in vec4 vColor;
     uniform sampler2D uShadowMap;
     in vec4 v_PositionFromLight;
+    in vec2 vTextureCoord;
 
     uniform bool isShadow;
     uniform vec4 uFogColor;
@@ -77,12 +82,10 @@ var sfsSource =`#version 300 es
     uniform mat4 uViewMatrix;
 
     out vec4 FragColor;
+    in vec4 v_Position;
     void main(void) {
-      //就是没事找事，非要用窗口坐标转成世界坐标，一道题目三种解法，懂吧
-      //然后根据y的位置判断雾的浓度
-      mat4 vp = inverse(uProjectionMatrix * uViewMatrix);  
-      vec4 worldPos =  vp * vec4(gl_FragCoord.xy/512.0*2.0-1.0,gl_FragCoord.z*2.0-1.0,1.0);
-      worldPos = worldPos/worldPos.w;
+      //最简单的方法
+      vec4 worldPos =  v_Position;
 
       float fogDensity = abs(uFogInfo[2] - worldPos.y) / (uFogInfo[2] - uFogInfo[1]);
       if(worldPos.y<uFogInfo[1] || worldPos.y>uFogInfo[2])
@@ -90,11 +93,11 @@ var sfsSource =`#version 300 es
       else
         fogDensity = clamp(uFogInfo[0]*fogDensity,0.0,uFogInfo[0]);
 
-      vec3 shadowCoord = vec3((v_PositionFromLight.xy/512.0)/2.0 + 0.5,v_PositionFromLight.z/2.0+0.5);
-      vec4 rgbaDepth = texture(uShadowMap, shadowCoord.xy);
+      vec3 shadowCoord = (v_PositionFromLight.xyz/v_PositionFromLight.w)/2.0 + 0.5;
+      vec4 rgbaDepth = texture(uShadowMap, vTextureCoord);
       float depth =  rgbaDepth.r;
       float visibility = 1.0;
-      if(isShadow) visibility = (shadowCoord.z > depth) ? 0.4 : 1.0;
+      if(isShadow) visibility = (shadowCoord.z > depth ) ? 0.4 : 1.0;
       vec4 finalColor = vec4(vColor.rgb * visibility, vColor.a);
       FragColor = mix(finalColor,uFogColor, fogDensity);
       // FragColor = finalColor;

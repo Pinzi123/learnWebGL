@@ -37,6 +37,7 @@ var sfsSource =`#version 300 es
     uniform vec3 uLightPosition;
     uniform vec3 uAmbientLight;
     uniform mat4 uViewMatrix;
+    uniform float zNear;
 
     uniform vec3 eye;
 
@@ -58,10 +59,10 @@ var sfsSource =`#version 300 es
       vec3 ambient = uAmbientLight * aVertexColor.rgb;
       vColor = vec4(ambient + diffuse + specular, aVertexColor.a);
       v_PositionFromLight = uProjectionMatrix * uMvMatrixFromLight * aVertexPosition;
-      v_Position = gl_Position;
+      v_Position = vec4(vertexPosition.xyz - eye,1.0);
 
-      v_eyeDirection =  vec3(vertexPosition.xyz) - eye;
-      v_eyeDirection = v_eyeDirection/v_eyeDirection.z;
+      v_eyeDirection = vertexPosition.xyz - eye;
+      v_eyeDirection = (v_eyeDirection/(gl_Position.z/gl_Position.w));
     }
   `;
 
@@ -84,17 +85,21 @@ var sfsSource =`#version 300 es
     uniform mat4 uProjectionMatrix;
     uniform mat4 uViewMatrix;
 
+    uniform float zNear;
+    uniform float zFar;
+
     out vec4 FragColor;
     in vec4 v_Position;
     void main(void) {
-      vec3 worldPos =  eye + (gl_FragCoord.z*2.0-1.0) * v_eyeDirection/gl_FragCoord.w;
+      //这种还原世界坐标方法吧，嗯，不好说
+      //未来的我，你会懂吧？
+      vec3 worldPos =  eye + (gl_FragCoord.z) * v_eyeDirection;
       
-
       float fogDensity = abs(uFogInfo[2] - worldPos.y) / (uFogInfo[2] - uFogInfo[1]);
       if(worldPos.y<uFogInfo[1] || worldPos.y>uFogInfo[2])
         fogDensity = 0.0;
       else
-        fogDensity = 1.0;
+        fogDensity = clamp(uFogInfo[0]*fogDensity,0.0,uFogInfo[0]);
 
       vec3 shadowCoord = (v_PositionFromLight.xyz/v_PositionFromLight.w)/2.0 + 0.5;
       vec4 rgbaDepth = texture(uShadowMap, shadowCoord.xy);
@@ -103,7 +108,5 @@ var sfsSource =`#version 300 es
       if(isShadow) visibility = (shadowCoord.z > depth ) ? 0.4 : 1.0;
       vec4 finalColor = vec4(vColor.rgb * visibility, vColor.a);
       FragColor = mix(finalColor,uFogColor, fogDensity);
-    //   FragColor = vec4(abs(v_eyeDirection),1.0);
-    //   FragColor = vec4(0.0,0.0,1.0,1.0);
     }
   `;
