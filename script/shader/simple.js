@@ -2,23 +2,42 @@
 const vsSource = `
 attribute vec4 aVertexPosition;
 attribute vec4 aVertexColor;
+attribute vec2 aTextureCoord;
 attribute vec4 aOffset;
-varying highp vec4 vColor;
 
+varying  vec4 vColor;
+varying  vec2 vTextureCoord;
+
+uniform mat4 uModelViewMatrix;
+uniform mat4 uProjectionMatrix;
+uniform bool isPlane;
 void main(void) {
-  gl_Position = aVertexPosition+aOffset;
-  vColor = aVertexColor;
+  if(isPlane){
+    gl_Position = uProjectionMatrix * uModelViewMatrix *(aVertexPosition);
+  }else{
+    gl_Position = uProjectionMatrix * uModelViewMatrix *(aVertexPosition+aOffset);
+  }
+  vColor = vColor;
+  vTextureCoord = aTextureCoord;
 }
 `;
 
 // Fragment shader program
 
 const fsSource = `
-precision highp float;
+precision mediump float;
+uniform sampler2D uSampler;
 
-varying highp vec4 vColor;
+varying  vec2 vTextureCoord;
+varying  vec4 vColor;
+uniform bool isPlane;
 void main(void) {
-  gl_FragColor = vec4(0.0,1.0,1.0,1.0);
-  
+  vec4 color = texture2D(uSampler, vTextureCoord);
+  if(color.a<0.5||isPlane){
+    gl_FragColor = vColor;
+  }else{
+    gl_FragColor = color;
+  }
+  // gl_FragColor = vec4(mix(color.rgb,vColor.rgb,color.a),1.0);
 }
 `;
