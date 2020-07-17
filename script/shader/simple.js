@@ -33,11 +33,13 @@ varying  vec4 vColor;
 uniform bool isPlane;
 void main(void) {
   vec4 color = texture2D(uSampler, vTextureCoord);
-  if(color.a<0.5||isPlane){
+  if(isPlane){
     gl_FragColor = vColor;
   }else{
-    gl_FragColor = color;
+    if(color.a<0.5)
+      discard;
+    else
+      gl_FragColor = color;
   }
-  // gl_FragColor = vec4(mix(color.rgb,vColor.rgb,color.a),1.0);
 }
 `;

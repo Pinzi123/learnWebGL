@@ -7,8 +7,9 @@ function  main() {
     
     gl.clearColor(0, 0, 0, 1);
     gl.enable(gl.DEPTH_TEST);
+    gl.enable(gl.BLEND);
     
-    let texture=null,offsetArray=[0,0,0],count=500;
+    let texture=null,offsetArray=[0,0,0],count=500,eyePos=[0.0,-5.0,3.0];
     initTextures(gl,"./img/snow.png").then((tex)=>{
         texture=tex;
         initOffser();
@@ -26,26 +27,35 @@ function  main() {
             ]
             offsetArray[index*3+0] = k1*10;
             offsetArray[index*3+1] = k2*20;
-            offsetArray[index*3+2] = k3*10;
+            offsetArray[index*3+2] = k3*20;
         }
     }
+
+    let position = [
+        -0.03, -0.03, 0, 
+        0.03, -0.03, 0, 
+        0.03, 0.03, 0, 
+        -0.03, 0.03, 0,
+    ];
+    let mat = new Matrix4(),PosAngle = angle([1,0,0],eyePos);
+    mat.rotate(PosAngle,1,0,0);
+    mat.rotate(PosAngle,0,0,1);
+    //永远正面朝向相机
+    for (let index = 0; index < 4; index++) {
+        position.splice(index*3,3,...mat.multiplyV3(position.slice(index*3,index*3+3)));
+    }
+    
+    const uv =  [
+        0, 0,
+        1, 0,
+        1, 1,
+        0, 1
+    ];
 
     const render = ()=>{
         gl.uniform1i(
             gl.getUniformLocation(gl.program,"isPlane"),
             false);
-        const position = [
-			-0.03, -0.03, 0, 
-			0.03, -0.03, 0, 
-			0.03, 0.03, 0, 
-			-0.03, 0.03, 0,
-        ];
-        const uv =  [
-			0, 0,
-            1, 0,
-            1, 1,
-		    0, 1
-        ];
         setPosition(gl,position,3,gl.FLOAT,[ 0, 1, 2,	0, 2, 3 ] ,null,uv);
         var offsets = new Float32Array(offsetArray);
         var offsetBuffer = gl.createBuffer();
@@ -72,7 +82,7 @@ function  main() {
             }
         }
         gl.clear(gl.COLOR_BUFFER_BIT);// 清空颜色缓冲区
-        camera.setEye([0.0,-5.0,3.0]).update();
+        camera.setEye(eyePos).update();
         drawPlane(gl);
         render();
         requestAnimationFrame(animation);

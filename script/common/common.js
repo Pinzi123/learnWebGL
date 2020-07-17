@@ -496,3 +496,42 @@ function setPointLight(gl,lightPosition=[1.0, 14.0, 0.0]){
     // Set the ambient light
     gl.uniform3f(programInfo.uniformLocations.ambientLight, 0.2, 0.2, 0.2);
   }
+
+
+function dot(a, b) {
+    let res =  a[0] * b[0] + a[1] * b[1] + a[2] * b[2] ;
+    return res;
+}
+
+function normalize(out, a) {
+    var x = a[0];
+    var y = a[1];
+    var z = a[2];
+    var len = x * x + y * y + z * z;
+    if (len > 0) {
+      //TODO: evaluate use of glm_invsqrt here?
+      len = 1 / Math.sqrt(len);
+      out[0] = x * len;
+      out[1] = y * len;
+      out[2] = z * len;
+    }
+    return out;
+  }
+
+function angle(a, b) {
+    var tempA = Array.from(a);
+    var tempB = Array.from(b);
+  
+    normalize(tempA, tempA);
+    normalize(tempB, tempB);
+  
+    var cosine = dot(tempA, tempB);
+  
+    if (cosine > 1.0) {
+      return 0;
+    } else if (cosine < -1.0) {
+      return 180;
+    } else {
+      return Math.acos(cosine)/Math.PI*180;
+    }
+  }

@@ -112,6 +112,17 @@ Matrix4.prototype.multiplyVector3 = function(pos) {
   return v;
 };
 
+Matrix4.prototype.multiplyV3 = function(p) {
+  var e = this.elements;
+  var result = [];
+
+  result[0] = p[0] * e[0] + p[1] * e[4] + p[2] * e[ 8] + e[12];
+  result[1] = p[0] * e[1] + p[1] * e[5] + p[2] * e[ 9] + e[13];
+  result[2] = p[0] * e[2] + p[1] * e[6] + p[2] * e[10] + e[14];
+
+  return result;
+};
+
 /**
  * Multiply the four-dimensional vector.
  * @param pos  The multiply vector
