@@ -13,7 +13,10 @@
 这里用到的是实例渲染
 ### [球体渐变成立方体](https://pinzi123.github.io/learnWebGL/SphereToCube.html)
 莫得灵魂，就是慢慢改变顶点坐标，当它在正方体上就结束。影子暴露了我，还没写这方面。
-### [影子和雾化](https://pinzi123.github.io/learnWebGL/shadow.html)
+### [阴影和雾化](https://pinzi123.github.io/learnWebGL/shadow.html)
+绘制阴影就是利用了两个着色器，
+先将视点移动至光源位置，并运行着色器一生成阴影贴图，记录片元的深度值
+再将视点移动至原来位置，将每个片元的深度值与阴影贴图记录的对比，阴影贴图的Z值更大就在这个片元绘制阴影
 ## ThreeJS的学习例子
 ### [粒子之下雨了](https://pinzi123.github.io/learnWebGL/threejs/rain.html)
 这里用到的是Sprite模型来实现
