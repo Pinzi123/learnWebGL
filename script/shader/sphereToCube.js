@@ -65,13 +65,13 @@ var sfsSource =`
         aCubePosition.z = -rrr;
       }
       if(progress>0.0&&progress<1.0)
-        gl_Position = uProjectionMatrix * uModelViewMatrix *  mix(aVertexPosition, aCubePosition, progress);
+        aCubePosition =  mix(aVertexPosition, aCubePosition, progress);
       else if(progress==0.0)
-        gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+        aCubePosition = aVertexPosition;
       else
-        gl_Position = uProjectionMatrix * uModelViewMatrix *  mix(aVertexPosition, aCubePosition, 1.0);
-
-      vec4 vertexPosition = uModelMatrix * aVertexPosition;
+        aCubePosition = mix(aVertexPosition, aCubePosition, 1.0);
+      gl_Position =  uProjectionMatrix * uModelViewMatrix * aCubePosition;
+      vec4 vertexPosition = uModelMatrix * aCubePosition;
       vec3 eyeDirection = normalize(eyeP - vec3(vertexPosition));
       vec3 lightDirection = normalize(uLightPosition - vec3(vertexPosition));
       vec3 normal = normalize(vec3(uNormalMatrix * aNormal));
@@ -82,7 +82,7 @@ var sfsSource =`
       vec3 ambient = uAmbientLight * aVertexColor.rgb;
       vColor = vec4(ambient + diffuse + specular, aVertexColor.a);
 
-      v_PositionFromLight = uProjectionMatrix * uMvMatrixFromLight * aVertexPosition;
+      v_PositionFromLight = uProjectionMatrix * uMvMatrixFromLight * aCubePosition;
     }
   `;
 

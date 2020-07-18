@@ -94,7 +94,7 @@ var sfsSource =`#version 300 es
         fogDensity = clamp(uFogInfo[0]*fogDensity,0.0,uFogInfo[0]);
 
       vec3 shadowCoord = (v_PositionFromLight.xyz/v_PositionFromLight.w)/2.0 + 0.5;
-      vec4 rgbaDepth = texture(uShadowMap, vTextureCoord);
+      vec4 rgbaDepth = texture(uShadowMap,  shadowCoord.xy);
       float depth =  rgbaDepth.r;
       float visibility = 1.0;
       if(isShadow) visibility = (shadowCoord.z > depth ) ? 0.4 : 1.0;
