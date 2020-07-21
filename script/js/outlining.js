@@ -27,6 +27,7 @@ function main() {
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     const render = (now) => {
+        cubeRotation += 0.01;
         drawScene(gl, cubeRotation);
     }
     requestAnimationFrame(render);
@@ -49,7 +50,7 @@ function drawScene(gl, rotation) {
     drawCube(gl);
 
     gl.stencilFunc(gl.NOTEQUAL, 1, 0xFF);
-    // gl.stencilMask(0x00); 
+    gl.stencilMask(0x00); 
     // gl.disable(gl.DEPTH_TEST);
     useProgram(gl, gl.singleProgram);
 
@@ -66,36 +67,9 @@ function drawCube(gl, scale=1){
             cube[index] = CubeVertices[index] * scale;
             
         }
-        // for (let index = 0; index < CubeVertices.length/3; index++) {
-        //     if((index+1) % 4 == 0){
-        //         cube.push(
-        //             ...[CubeVertices[index*3] * scale,
-        //             CubeVertices[index*3+1] * scale,
-        //             CubeVertices[index*3+2] * scale,
-        //         ]) ;
-        //         cube.push(
-        //             ...[CubeVertices[(index-3)*3] * scale,
-        //             CubeVertices[(index-3)*3+1] * scale,
-        //             CubeVertices[(index-3)*3+2] * scale,
-        //         ]) ;
-        //     }else{
-        //         cube.push(
-        //             ...[CubeVertices[index*3] * scale,
-        //             CubeVertices[index*3+1] * scale,
-        //             CubeVertices[index*3+2] * scale,
-        //         ]) ;
-        //         cube.push(
-        //             ...[CubeVertices[(index+1)*3] * scale,
-        //             CubeVertices[(index+1)*3+1] * scale,
-        //             CubeVertices[(index+1)*3+2] * scale,
-        //         ]) ;
-        //     }
-        // }
         setPosition(gl,cube,3,gl.FLOAT,null,null);
         setOnecolor(gl,[1.0, 1.0, 1.0, 1.0],CubeVertices.length/3);
         setPointLight(gl,lightPos);
-
-        // gl.drawElements(gl.LINES,32, gl.UNSIGNED_SHORT, 0);
 
         gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
     }else{

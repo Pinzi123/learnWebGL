@@ -42,6 +42,6 @@
   const shaderSingleColor = `
   void main(void)
   {
-    gl_FragColor = vec4(1.00, 0.00, 0.00, 0.3);
+    gl_FragColor = vec4(1.00, 0.00, 0.00, 1.0);
   }
 `;

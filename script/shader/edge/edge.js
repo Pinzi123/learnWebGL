@@ -49,7 +49,7 @@ const fsSource = `#version 300 es
     uniform sampler2D uSampler;
 
     
-     float edgeOnly = 1.0;//调节这个加上原图的颜色
+     float edgeOnly = 0.0;//调节这个加上原图的颜色
      vec4 edgeColor = vec4(0.0,0.0,0.0,1.0);
      vec4 BColor = vec4(1.0,1.0,1.0,1.0);
 
