@@ -12,7 +12,7 @@
 ### [粒子之下雪了](https://pinzi123.github.io/learnWebGL/particle.html)
 这里用到的是实例渲染
 ### [球体渐变成立方体](https://pinzi123.github.io/learnWebGL/SphereToCube.html)
-莫得灵魂，就是慢慢改变顶点坐标，当它在正方体上就结束。影子暴露了我，还没写这方面。
+莫得灵魂，就是利用mix方法慢慢改变顶点坐标，当它在正方体上就结束。影子暴露了我，还没写这方面。
 ### [阴影和雾化](https://pinzi123.github.io/learnWebGL/shadow.html)
 绘制阴影就是利用了两个着色器，
 先将视点移动至光源位置，并运行着色器一生成阴影贴图，记录片元的深度值
