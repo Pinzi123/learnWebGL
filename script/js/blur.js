@@ -43,9 +43,9 @@ function main() {
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         // drawPlane2(gl, fbo2.texture, texture, true);
         // bloom效果
-        // blur(fbo2.texture,texture);
+        blur(fbo2.texture,texture);
         // 模糊效果
-        blur(texture);
+        // blur(texture);
         // drawPlane2(gl,texture,fbo.texture);
     })
 

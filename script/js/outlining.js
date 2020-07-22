@@ -23,8 +23,6 @@ function main() {
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.STENCIL_TEST);
     gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE);  
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     const render = (now) => {
         cubeRotation += 0.01;
@@ -44,12 +42,12 @@ function drawScene(gl, rotation) {
     drawPlane(gl);
 
 
-    gl.stencilFunc(gl.ALWAYS, 1, 0xFF); 
+    gl.stencilFunc(gl.ALWAYS, 1, 1); 
     gl.stencilMask(0xFF); 
     setMVP(gl, rotation);
     drawCube(gl);
 
-    gl.stencilFunc(gl.NOTEQUAL, 1, 0xFF);
+    gl.stencilFunc(gl.NOTEQUAL, 1, 1);
     gl.stencilMask(0x00); 
     // gl.disable(gl.DEPTH_TEST);
     useProgram(gl, gl.singleProgram);
