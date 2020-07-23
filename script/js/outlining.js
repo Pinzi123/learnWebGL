@@ -42,13 +42,15 @@ function drawScene(gl, rotation) {
     drawPlane(gl);
 
 
-    gl.stencilFunc(gl.ALWAYS, 1, 1); 
-    gl.stencilMask(0xFF); 
+    gl.stencilFunc(gl.ALWAYS, 1, 1);
+    //stencilMask允许我们给模板值设置一个位遮罩(Bitmask)，
+    //它与模板值进行按位与(AND)运算决定缓冲是否可写。
+    gl.stencilMask(1); 
     setMVP(gl, rotation);
     drawCube(gl);
 
     gl.stencilFunc(gl.NOTEQUAL, 1, 1);
-    gl.stencilMask(0x00); 
+    gl.stencilMask(0); 
     // gl.disable(gl.DEPTH_TEST);
     useProgram(gl, gl.singleProgram);
 

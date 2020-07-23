@@ -84,6 +84,16 @@ const BlurFsSource = `#version 300 es
  * 再利用高斯模糊对这张渲染纹理进行模糊处理，模拟光线扩展的效果
  * 最够将其与原图像进行混合
  */
+ // HDR常常与Bloom结合使用
+ /**
+ * 	HDR，High Dynamic Range, 高动态范围
+ * 通过使片段的颜色超过1.0，我们有了一个更大的颜色范围，这也被称作HDR。
+ * 有了HDR，亮的东西可以变得非常亮，暗的东西可以变得非常暗，而且充满细节。
+ * 
+ * HDR渲染和其很相似，我们允许用更大范围的颜色值渲染从而获取大范围的黑暗与明亮的场景细节，
+ * 最后将所有HDR值转换成在[0.0, 1.0]范围的LDR(Low Dynamic Range,低动态范围)。
+ * 转换HDR值到LDR值得过程叫做色调映射(Tone Mapping)，现在现存有很多的色调映射算法，
+ */
 const MFsSource = `#version 300 es
 precision mediump float;
 
@@ -92,11 +102,17 @@ uniform sampler2D uSampler;
 uniform sampler2D uSampler1;
 
 uniform bool hh;
-
+const float gamma = 2.2;
 out vec4 FragColor;
 void main(void) {
+  vec4 hdrColor =  texture(uSampler, vTextureCoord) + texture(uSampler1, vTextureCoord);
 
-  FragColor =  texture(uSampler, vTextureCoord) + texture(uSampler1, vTextureCoord);
-  
+  //Reinhard色调映射算法平均得将所有亮度值分散到LDR上。
+  //这个算法是倾向明亮的区域的，暗的区域会不那么精细也不那么有区分度
+  vec3 mapped = hdrColor.rgb / (hdrColor.rgb + vec3(1.0));
+  // Gamma校正
+  mapped = pow(mapped, vec3(1.0 / gamma));
+  // FragColor = mappped;
+  FragColor = hdrColor;
 }
 `;
